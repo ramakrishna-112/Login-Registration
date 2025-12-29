@@ -45,30 +45,29 @@ export const Register = async (req, res) => {
 /* ========== LOGIN ========== */
 export const Login = async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         status: false,
         message: "Email and password are required",
-      })
+      });
     }
 
-    // password is select:false → explicitly select it
-    const user = await User.findOne({ email }).select("+password")
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({
         status: false,
         message: "Invalid email or password",
-      })
+      });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({
         status: false,
         message: "Invalid email or password",
-      })
+      });
     }
 
     const token = jwt.sign(
@@ -79,22 +78,30 @@ export const Login = async (req, res) => {
       },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
-    )
+    );
+
+    // ✅ CRITICAL: SET TOKEN AS COOKIE
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,        // REQUIRED on Render (HTTPS)
+      sameSite: "none",    // REQUIRED for Vercel ↔ Render
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     return res.status(200).json({
       status: true,
       message: "Login successful",
-      token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
       },
-    })
+    });
   } catch (error) {
     return res.status(500).json({
       status: false,
       message: "Server error",
-    })
+    });
   }
-}
+};
+
