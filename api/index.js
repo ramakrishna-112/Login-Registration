@@ -10,21 +10,38 @@ dotenv.config();
 const app = express();
 
 /* ===================== MIDDLEWARE ===================== */
+
+// Parse JSON
 app.use(express.json());
+
+// Parse cookies
 app.use(cookieParser());
+
+// ✅ FINAL CORS CONFIG (CRITICAL)
+const allowedOrigins = [
+  "http://localhost:5173", // local frontend
+  "https://login-registration-dusky.vercel.app", // production frontend
+];
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173", // local Vite frontend
-      "https://login-registration-dusky.vercel.app", // Vercel frontend
-    ],
+    origin: function (origin, callback) {
+      // allow server-to-server & Postman
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("CORS not allowed"));
+      }
+    },
+    credentials: true, // REQUIRED for cookies
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true, // ✅ MUST BE TRUE
   })
 );
 
 /* ===================== ROUTES ===================== */
+
 app.get("/", (req, res) => {
   res.status(200).json({ status: "Backend is running" });
 });
@@ -32,6 +49,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", AuthRoute);
 
 /* ===================== DATABASE + SERVER ===================== */
+
 const PORT = process.env.PORT || 5000;
 
 mongoose
