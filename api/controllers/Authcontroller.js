@@ -1,73 +1,100 @@
 import User from "../models/user.model.js"
-import bryptjs from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
+
+/* ========== REGISTER ========== */
 export const Register = async (req, res) => {
-    try {
-        const { name, email, password } = req.body
-        // check if user not registered
-        const checkRegistrationStatus = await User.findOne({ email })
-        if (checkRegistrationStatus) {
-            return res.status(409).json({
-                status: false,
-                message: "User already registered"
-            })
-        }
+  try {
+    const { name, email, password } = req.body
 
-        // hash password 
-        const hashPassword = bryptjs.hashSync(password)
-        const newRegistration = new User({
-            name, email, password: hashPassword
-        })
-
-        await newRegistration.save();
-
-        res.status(200).json({
-            status: true,
-            message: "Registration success."
-        })
-
-    } catch (error) {
-        res.status(500).json({
-            status: false, error
-        })
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        status: false,
+        message: "All fields are required",
+      })
     }
+
+    const existingUser = await User.findOne({ email })
+    if (existingUser) {
+      return res.status(409).json({
+        status: false,
+        message: "User already registered",
+      })
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    await User.create({
+      name,
+      email,
+      password: hashedPassword,
+    })
+
+    return res.status(201).json({
+      status: true,
+      message: "Registration successful",
+    })
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+    })
+  }
 }
+
+/* ========== LOGIN ========== */
 export const Login = async (req, res) => {
-    try {
-        const { email, password } = req.body
-        // check if user not registered
-        const user = await User.findOne({ email }).lean().exec()
-        if (!user) {
-            return res.status(403).json({
-                status: false,
-                message: "Invalid login credentials."
-            })
-        }
+  try {
+    const { email, password } = req.body
 
-        // check password 
-        const isVerifyPassword = await bryptjs.compare(password, user.password)
-        if (!isVerifyPassword) {
-            return res.status(403).json({
-                status: false,
-                message: "Invalid login credentials."
-            })
-        }
-
-        delete user.password
-
-        const token = jwt.sign(user, process.env.JWT_SECRET)
-
-        res.cookie('access_token', token, {
-            httpOnly: true
-        })
-        res.status(200).json({
-            status: true,
-            message: "Login success."
-        })
-
-    } catch (error) {
-        res.status(500).json({
-            status: false, error
-        })
+    if (!email || !password) {
+      return res.status(400).json({
+        status: false,
+        message: "Email and password are required",
+      })
     }
+
+    // password is select:false → explicitly select it
+    const user = await User.findOne({ email }).select("+password")
+    if (!user) {
+      return res.status(401).json({
+        status: false,
+        message: "Invalid email or password",
+      })
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) {
+      return res.status(401).json({
+        status: false,
+        message: "Invalid email or password",
+      })
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    )
+
+    return res.status(200).json({
+      status: true,
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    })
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+    })
+  }
 }
