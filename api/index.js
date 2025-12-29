@@ -11,32 +11,15 @@ const app = express();
 
 /* ===================== MIDDLEWARE ===================== */
 
-// Parse JSON
 app.use(express.json());
-
-// Parse cookies
 app.use(cookieParser());
 
-// ✅ FINAL CORS CONFIG (CRITICAL)
-const allowedOrigins = [
-  "http://localhost:5173", // local frontend
-  "https://login-registration-dusky.vercel.app", // production frontend
-];
-
+// ✅ SIMPLE & SAFE CORS (PRODUCTION READY)
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow server-to-server & Postman
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        return callback(new Error("CORS not allowed"));
-      }
-    },
-    credentials: true, // REQUIRED for cookies
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: "https://login-registration-dusky.vercel.app",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 
@@ -56,7 +39,6 @@ mongoose
   .connect(process.env.MONGODB_CONN)
   .then(() => {
     console.log("Database connected");
-
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
