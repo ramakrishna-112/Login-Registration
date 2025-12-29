@@ -17,11 +17,15 @@ app.use(cookieParser());
 // ✅ SIMPLE & SAFE CORS (PRODUCTION READY)
 app.use(
   cors({
-    origin: "https://login-registration-dusky.vercel.app",
+    origin: [
+      "https://login-registration-dusky.vercel.app",
+      "https://login-registration-d6lt9uokq-ramakrishna-112s-projects.vercel.app",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
+
 
 /* ===================== ROUTES ===================== */
 
