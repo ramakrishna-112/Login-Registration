@@ -1,10 +1,8 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+
+import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
 import {
   Form,
   FormControl,
@@ -12,18 +10,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { toast } from "@/hooks/use-toast";
+} from "../components/ui/form";
+import { Input } from "../components/ui/input";
+import { toast } from "../hooks/use-toast";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
 
-  // ✅ Environment variable (correct usage)
+  // Backend base URL from Vercel env
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  console.log("API URL:", baseUrl); // remove after verification
 
-  // ✅ Validation schema
   const formSchema = z
     .object({
       name: z.string().min(3, {
@@ -52,13 +52,12 @@ const RegisterPage = () => {
     },
   });
 
-  // ✅ Corrected API call
   const handleForm = async (values) => {
     try {
       const response = await fetch(
         `${baseUrl}/api/auth/register`,
         {
-          method: "POST", // ✅ FIXED
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -177,10 +176,7 @@ const RegisterPage = () => {
               <div className="flex justify-center text-sm mt-4">
                 <p>
                   Already have an account?{" "}
-                  <Link
-                    to="/login"
-                    className="underline text-blue-500"
-                  >
+                  <Link to="/login" className="underline text-blue-500">
                     Login now
                   </Link>
                 </p>

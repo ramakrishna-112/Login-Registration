@@ -1,26 +1,31 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React from "react";
+import { Link } from "react-router-dom";
+
+import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
 
 const HomePage = () => {
-    return (
-        <div className='h-screen w-screen flex justify-center items-center'>
-            <Card className="pt-5">
-                <CardContent>
-                    <h1 className='text-center text-2xl font-bold mb-5'>Welcome To Mern Authentication</h1>
-                    <div className='flex justify-center gap-10'>
-                        <Button>
-                            <Link to="/login">Login</Link>
-                        </Button>
-                        <Button>
-                            <Link to="/register">Register</Link>
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-    )
-}
+  return (
+    <div className="h-screen w-screen flex justify-center items-center">
+      <Card className="pt-5">
+        <CardContent>
+          <h1 className="text-center text-2xl font-bold mb-5">
+            Welcome To MERN Authentication
+          </h1>
 
-export default HomePage
+          <div className="flex justify-center gap-10">
+            <Button asChild>
+              <Link to="/login">Login</Link>
+            </Button>
+
+            <Button asChild>
+              <Link to="/register">Register</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default HomePage;
