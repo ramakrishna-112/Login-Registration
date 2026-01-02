@@ -13,7 +13,10 @@ import { Label } from "./label";
 /*                                    Form                                    */
 /* -------------------------------------------------------------------------- */
 
-const Form = FormProvider;
+function Form({ children, ...props }) {
+  return <FormProvider {...props}>{children}</FormProvider>;
+}
+
 
 /* -------------------------------------------------------------------------- */
 /*                                   Contexts                                 */
